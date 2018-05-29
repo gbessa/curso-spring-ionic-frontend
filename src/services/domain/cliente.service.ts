@@ -22,4 +22,13 @@ export class ClienteService {
         return this.http.get(url, {responseType: 'blob'});
     }
 
+    insert(obj: ClienteDTO): Observable<any> {
+        return this.http.post(`${API_CONFIG.baseUrl}/clientes`,
+        obj,
+        {
+            observe: 'response',
+            responseType: 'text'
+        })
+    }
+
 }
