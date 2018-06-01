@@ -3,6 +3,7 @@ import { API_CONFIG } from "../../config/api.config";
 import { StorageService } from "../storage.service";
 import { Cart } from "../../models/cart";
 import { ProdutoDTO } from "../../models/produto.dto";
+import { Item } from "ionic-angular";
 
 @Injectable()
 export class CartService {
@@ -30,9 +31,49 @@ export class CartService {
         let position = cart.items.findIndex(x => x.produto.id === produto.id);
         if (position === -1) {
             cart.items.push({quantidade: 1, produto: produto});
+        } else {
+            cart.items[position].quantidade++;
         }
         this.storage.setCart(cart);
         return cart;
     }
 
+    removeProduto(produto: ProdutoDTO): Cart {
+        let cart = this.getCart();
+        let position = cart.items.findIndex(x => x.produto.id === produto.id);
+        if (position !== -1) {
+            cart.items.splice(position, 1);
+        }
+        this.storage.setCart(cart);
+        return cart;
+    }
+
+    increaseQuantity(produto: ProdutoDTO): Cart {
+        let cart = this.getCart();
+        let position = cart.items.findIndex(x => x.produto.id === produto.id);
+        if (position !== -1) {
+            cart.items[position].quantidade++;
+        }
+        this.storage.setCart(cart);
+        return cart;
+    }
+
+    decreaseQuantity(produto: ProdutoDTO): Cart {
+        let cart = this.getCart();
+        let position = cart.items.findIndex(x => x.produto.id === produto.id);
+        if (position !== -1) {
+            if (cart.items[position].quantidade === 1) {
+                cart = this.removeProduto(produto);
+            } else {
+                cart.items[position].quantidade--;
+            }
+        }
+        this.storage.setCart(cart);
+        return cart;
+    }
+
+    total(): number {
+        let cart = this.getCart();
+        return cart.items[0] ? cart.items.map(item => item.produto.preco * item.quantidade).reduce((a, b) => a+b) : 0
+    }
 }
