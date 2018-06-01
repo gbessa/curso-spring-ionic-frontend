@@ -1,12 +1,10 @@
 import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams } from 'ionic-angular';
-
-/**
- * Generated class for the CartPage page.
- *
- * See https://ionicframework.com/docs/components/#navigation for more info on
- * Ionic pages and navigation.
- */
+import { CartItem } from '../../models/cart-item';
+import { StorageService } from '../../services/storage.service';
+import { ProdutoService } from '../../services/domain/produto.service';
+import { API_CONFIG } from '../../config/api.config';
+import { CartService } from '../../services/domain/cart.service';
 
 @IonicPage()
 @Component({
@@ -15,11 +13,29 @@ import { IonicPage, NavController, NavParams } from 'ionic-angular';
 })
 export class CartPage {
 
-  constructor(public navCtrl: NavController, public navParams: NavParams) {
+  items: CartItem[];
+
+  constructor(
+    public navCtrl: NavController, 
+    public navParams: NavParams,
+    public produtoService: ProdutoService,
+    public cartService: CartService) {
   }
 
   ionViewDidLoad() {
-    console.log('ionViewDidLoad CartPage');
+    let cart = this.cartService.getCart();
+    this.items = cart.items;
+    this.loadImageUrls();
+  }
+
+  loadImageUrls() {
+    this.items.map(item => {
+      this.produtoService.getSmallImageFromBucket(item.produto.id)
+      .subscribe(response => {
+        item.produto.imageUrl = `${API_CONFIG.bucketBaseURL}/prod${item.produto.id}-small.jpg`
+      },
+      error => {});
+    })
   }
 
 }
