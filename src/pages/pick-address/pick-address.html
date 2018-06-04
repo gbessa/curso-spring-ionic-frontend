@@ -7,13 +7,12 @@
   </ion-navbar>
 </ion-header>
 
-
 <ion-content padding>
   <ion-list>
     <ion-list-header>
       Selecione um endereço
     </ion-list-header>
-    <button ion-item *ngFor="let item of items">
+    <button ion-item *ngFor="let item of items" (click)="nextPage(item)">
       <h2>{{item.logradouro}}, {{item.numero}}</h2>
       <h2>{{item.complemento}} {{item.bairro}} CEP {{item.cep}}</h2>
       <h2>{{item.cidade.nome}}, {{item.cidade.estado.nome}}</h2>
