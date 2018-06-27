@@ -2,7 +2,6 @@ import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams, LoadingController } from 'ionic-angular';
 import { ProdutoDTO } from '../../models/produto.dto';
 import { ProdutoService } from '../../services/domain/produto.service';
-import { CategoriaDTO } from '../../models/categoria.dto';
 import { API_CONFIG } from '../../config/api.config';
 
 @IonicPage()
@@ -12,7 +11,8 @@ import { API_CONFIG } from '../../config/api.config';
 })
 export class ProdutosPage {
 
-  items: ProdutoDTO[];
+  items: ProdutoDTO[] = [];
+  page: number = 0;
 
   constructor(
     public navCtrl: NavController, 
@@ -28,10 +28,11 @@ export class ProdutosPage {
   private loadData() {
     let categoria_id = this.navParams.get('categoria_id');
     let loading = this.presentLoadingDefault();
-    this.produtoService.findByCategoria(categoria_id)
+    this.produtoService.findByCategoria(categoria_id, this.page, 10)
     .subscribe(response => {
-      this.items = response['content'];
-      this.loadImageUrls();
+      let newItems = response['content'];
+      this.loadImageUrls(newItems);
+      this.items = this.items.concat(newItems);
       loading.dismiss();
     },
     error => {
@@ -39,8 +40,8 @@ export class ProdutosPage {
     }); 
   }
 
-  loadImageUrls() {
-    this.items.map(produto => {
+  loadImageUrls(newItems) {
+    newItems.map(produto => {
       this.produtoService.getSmallImageFromBucket(produto.id)
       .subscribe(response => {
         produto.imageUrl = `${API_CONFIG.bucketBaseURL}/prod${produto.id}-small.jpg`
@@ -64,10 +65,20 @@ export class ProdutosPage {
   }
 
   doRefresh(refresher) {
+    this.page = 0;
+    this.items = [];
     this.loadData();
     setTimeout(() => {
       refresher.complete();
     }, 1000);
+  }  
+
+  doInfinite(infiniteScroll) {
+    this.page++;
+    this.loadData();
+    setTimeout(() => {
+      infiniteScroll.complete();
+    }, 500);
   }  
 
 }
